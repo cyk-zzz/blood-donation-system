@@ -1,16 +1,17 @@
-public class BloodDonor extends User implements Display {
+public class BloodDonor extends User{
     final Name name;
     final Blood bloodType;
-    String IC;
+    final String IC;
     int age;
     double weight;
 
-    public BloodDonor(Name name,String IC,int age,double weight,Blood bloodType) {
-        this.name = name;
+    public BloodDonor(String username, String password, String firstName, String lastName, String IC,int age,double weight,String bloodType) {
+        super(username,password);
+        name = new Name(firstName,lastName);
         this.IC = IC;
         this.age = age;
         this.weight = weight;
-        this.bloodType = bloodType;
+        this.bloodType = Blood.valueOf(bloodType);
     }
 
     public String getName() {

@@ -1,11 +1,14 @@
+import java.time.LocalDate;
+import java.util.ArrayList;
+
 public class BloodDonationEvent {
     private int eventID;
     private State eventState;
     private String eventAddress;
     private LocalDate eventDate;
-    private Vector <User> donorlist = new Vector <User>();
+    private ArrayList <BloodDonor> donorlist = new ArrayList<>();
 
-    public BloodDonationEvent(int eventID,State evesState,String eventDate,Data date){
+    public BloodDonationEvent(int eventID,State evesState,LocalDate eventDate,Data date){
         this.eventID=eventID;
         this.eventState=evesState;
         this.eventDate=eventDate;
