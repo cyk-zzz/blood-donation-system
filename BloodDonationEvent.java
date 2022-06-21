@@ -8,7 +8,7 @@ public class BloodDonationEvent {
     private LocalDate eventDate;
     private ArrayList <BloodDonor> donorlist = new ArrayList<>();
 
-    public BloodDonationEvent(int eventID,State evesState,LocalDate eventDate,Data date){
+    public BloodDonationEvent(int eventID,State evesState,LocalDate eventDate){
         this.eventID=eventID;
         this.eventState=evesState;
         this.eventDate=eventDate;
