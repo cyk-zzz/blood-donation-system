@@ -7,6 +7,6 @@ public class Admin extends User{
     }
 
     public void printInfo(){
-        System.out.printf("%-10d%-15s%-20s", adminID, username, password);
+        System.out.printf("%-10d%-15s%-20s", adminID, getUsername(), getPassword());
     }
 }

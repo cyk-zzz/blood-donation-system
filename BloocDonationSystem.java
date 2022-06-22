@@ -15,39 +15,36 @@ public class BloocDonationSystem {
 
     public void loadDonor() throws FileNotFoundException{
         File DonorFile = new File(BloodDonorPath);
-        Scanner Read = new Scanner(DonorFile);
-        Read.useDelimiter(",");
-        while(Read.hasNext()){
-            String username = Read.next();
-            String password = Read.next();
-            String firstName = Read.next();
-            String lastName = Read.next();
-            String IC = Read.next();
-            int yearBirth = Read.nextInt();
-            double weight = Read.nextDouble();
-            String bloodType = Read.next();
+        Scanner read = new Scanner(DonorFile);
+        read.useDelimiter(",");
+        while(read.hasNext()){
+            String username = read.next();
+            String password = read.next();
+            String firstName = read.next();
+            String lastName = read.next();
+            String IC = read.next();
+            int yearBirth = read.nextInt();
+            double weight = read.nextDouble();
+            String bloodType = read.next();
 
             DonorList.add(new BloodDonor(username, password, firstName, lastName, IC, yearBirth, weight, bloodType));
         }
+        read.close();
     }
-    public void loadEvent(){
+    public void loadEvent() throws FileNotFoundException{
         File EventFile = new File(BloodDonorEventPath);
         Scanner read = new Scanner(EventFile);
         read.useDelimiter(",");
-        while(read.hasNext()){
+        while(read.hasNextInt()){
             int id = read.nextInt();
             String state = read.next();
             String address = read.next();
             String date = read.next();
+            System.out.print(id);
 
             EventList.add(new BloodDonationEvent(id, state, address, date));
         }
         read.close();
-
-        System.out.println("Eventlist:");
-        for(int i=0; i<EventList.size();i++){
-            System.out.println(EventList.get(i)+"\n");
-        }
     }
     public void saveDonor(){
 
@@ -153,6 +150,6 @@ public class BloocDonationSystem {
 
     public static void main(String[] args) throws FileNotFoundException {
         BloocDonationSystem sys = new BloocDonationSystem();
-        sys.loadDonor();
+        sys.loadEvent();
     }
 }

@@ -1,4 +1,5 @@
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class BloodDonationEvent {
@@ -8,12 +9,15 @@ public class BloodDonationEvent {
     private LocalDate eventDate;
     private ArrayList <BloodDonor> donorlist = new ArrayList<>();
 
-    public BloodDonationEvent(int eventID,State evesState,LocalDate eventDate){
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    
+    public BloodDonationEvent(int eventID,String eState,String eventAddress, String eDate){
         this.eventID=eventID;
-        this.eventState=evesState;
-        this.eventDate=eventDate;
+        eventState=State.valueOf(eState);
+        this.eventAddress = eventAddress;
+        eventDate = LocalDate.parse(eDate,formatter);
+        System.out.println("Created!");
     }
-
     public int getEventID() {
         return eventID;
     }
