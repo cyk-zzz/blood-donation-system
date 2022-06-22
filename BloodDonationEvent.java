@@ -3,7 +3,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class BloodDonationEvent {
-    private int eventID;
+    private String eventID;
+    private String eventName;
     private State eventState;
     private String eventAddress;
     private LocalDate eventDate;
@@ -11,15 +12,18 @@ public class BloodDonationEvent {
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     
-    public BloodDonationEvent(int eventID,String eState,String eventAddress, String eDate){
+    public BloodDonationEvent(String eventID,String eventName, String eState,String eventAddress, String eDate){
         this.eventID=eventID;
+        this.eventName = eventName;
         eventState=State.valueOf(eState);
         this.eventAddress = eventAddress;
         eventDate = LocalDate.parse(eDate,formatter);
-        System.out.println("Created!");
     }
-    public int getEventID() {
+    public String getEventID() {
         return eventID;
+    }
+    public String getEventName(){
+        return eventName;
     }
     public State getEventState(){
         return eventState;
@@ -29,6 +33,13 @@ public class BloodDonationEvent {
     }
     public LocalDate getEventDate() {
         return eventDate;
+    }
+
+    public void printInfo(){
+        System.out.println("Event Name: "+eventName);
+        System.out.println("State: "+eventState.name());
+        System.out.println("Address: "+eventAddress);
+        System.out.println("Date: "+eventDate.toString());
     }
     
 }

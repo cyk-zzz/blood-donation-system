@@ -26,7 +26,27 @@ public class BloodDonor extends User{
     public String getName() {
         return name.getFirstName() + name.getLastName();
     }
-    public String getBloodType(){ return bloodType.getName(); }
+
+    @Override
+    public String getUsername() {
+        return super.getUsername();
+    }
+
+    @Override
+    public String getPassword() {
+        return super.getPassword();
+    }
+
+    public String getFirstName(){
+        return name.getFirstName();
+    }
+
+    public String getLastName(){
+        return name.getLastName();
+    }
+
+
+    public String getBloodType(){ return bloodType.name(); }
     public String getIC() {
         return IC;
     }
