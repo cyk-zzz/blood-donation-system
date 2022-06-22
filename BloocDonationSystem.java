@@ -31,7 +31,23 @@ public class BloocDonationSystem {
         }
     }
     public void loadEvent(){
+        File EventFile = new File(BloodDonorEventPath);
+        Scanner read = new Scanner(EventFile);
+        read.useDelimiter(",");
+        while(read.hasNext()){
+            int id = read.nextInt();
+            String state = read.next();
+            String address = read.next();
+            String date = read.next();
 
+            EventList.add(new BloodDonationEvent(id, state, address, date));
+        }
+        read.close();
+
+        System.out.println("Eventlist:");
+        for(int i=0; i<EventList.size();i++){
+            System.out.println(EventList.get(i)+"\n");
+        }
     }
     public void saveDonor(){
 
