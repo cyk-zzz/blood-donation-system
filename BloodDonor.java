@@ -1,30 +1,25 @@
 public class BloodDonor extends User{
+    int ID;
     final Name name;
     final Blood bloodType;
     final String IC;
     int yearBirth;
     double weight;
 
-    //Username
-    //Password
-    //Firstname
-    //Lastname
-    //IC
-    //YearBirth
-    //Weight
-    //BloodType
 
-    public BloodDonor(String username, String password, String firstName, String lastName, String IC,int yearBirth,double weight,String bloodType) {
+    public BloodDonor(int ID, String username, String password, String firstName, String lastName, String IC,int yearBirth,double weight,String bloodType) {
         super(username,password);
+        this.ID = ID;
         name = new Name(firstName,lastName);
         this.IC = IC;
         this.yearBirth = yearBirth;
         this.weight = weight;
         this.bloodType = Blood.valueOf(bloodType);
+        
     }
 
     public String getName() {
-        return name.getFirstName() + name.getLastName();
+        return name.getFullName();
     }
 
     @Override
@@ -63,5 +58,9 @@ public class BloodDonor extends User{
         System.out.println("Year Of Birth: " + yearBirth);
         System.out.println("Weight: " + weight + " KG");
         System.out.println("Blood Type: " + bloodType.getName());
+    }
+
+    public int getID() {
+        return ID;
     }
 }
