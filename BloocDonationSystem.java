@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class BloocDonationSystem {
@@ -17,6 +18,7 @@ public class BloocDonationSystem {
     final String PendingPath = "Text\\PendingApplication.txt";
     private ArrayList<BloodDonor> DonorList = new ArrayList<>();
     private ArrayList<BloodDonationEvent> EventList = new ArrayList<>();
+    private ArrayList<Integer> ArrayReturned = new ArrayList<>(); 
     private int currLoggedInDonorID; // set curr donor
 
     Scanner input = new Scanner(System.in);
@@ -276,21 +278,20 @@ public class BloocDonationSystem {
         clearScreen();
     }
 
-    //done
+    //choose from whole list
     public void editEvent(){
-        int innerChoice=0 ,choice=0;
+        int innerChoice=0 ,choice=0,exitIndex;
         while(choice!=(EventList.size()+1)){
             try{
-                printEventList();
-                System.out.printf("%-4s%s\n",(EventList.size()+1),"Back to Admin Menu\n");
+                exitIndex = printEventList(0); // display whole event list
 
                 choice = getChoice();
-                if (ChoiceNotInRange(1, (EventList.size()+1), choice)) {
+                if (ChoiceNotInRange(1, exitIndex, choice)) {
                     throw new InvalidChoice("Invalid Choice");
                 }
                 //if not back to admin menu
-                if(choice != (EventList.size()+1)){
-                    EventList.get((choice-1)).printInfo();
+                if(choice >0 && choice<exitIndex){
+                    EventList.get(ArrayReturned.get(choice-1)).printInfo();
 
                     //field to edit
                     System.out.println("<<< Edit Event >>>");
@@ -301,13 +302,13 @@ public class BloocDonationSystem {
                     System.out.println("5. Cancel");
                     innerChoice = getChoice();
                     if (innerChoice == 1) {
-                        EventList.get((choice - 1)).editEventName();
+                        EventList.get(ArrayReturned.get(choice-1)).editEventName();
                     } else if (innerChoice == 2) {
-                        EventList.get((choice - 1)).editState();
+                        EventList.get(ArrayReturned.get(choice-1)).editState();
                     } else if (innerChoice == 3) {
-                        EventList.get((choice - 1)).editAddress();
+                        EventList.get(ArrayReturned.get(choice-1)).editAddress();
                     } else if (innerChoice == 4) {
-                        EventList.get((choice - 1)).editDate();
+                        EventList.get(ArrayReturned.get(choice-1)).editDate();
                     }
                     
                 }
@@ -323,20 +324,54 @@ public class BloocDonationSystem {
         }
     }
 
-    //done
-    public void printEventList(){
+    //variable day: 0=printEntireEventList 1=printPassEventList, 2=printUpcomingEventList
+    // return exit index (index for back to admin menu)
+    public int printEventList(int needChoose){
+        //clearScreen();
+        int day = needChoose; //by default, print upcoming event for approve donor application
+        if(day == -1){
+            System.out.println("==========================");
+            System.out.println("   Display Event List");
+            System.out.println("==========================");
+            System.out.println("[0]=printEntireEventList; [1]=printPassEventList; [2]=printUpcomingEventList");
+            day = getChoice();
+            if(day!=0 && day!=1 && day!=2){
+                return -1;// invalid choice, return to admin menu
+            }
+        }
+        
         clearScreen();
         System.out.println("==========================");
-        System.out.println("      Event List");
+        if(day == 0){
+            System.out.println("   Event List");
+        }
+        else if(day == 1){
+            System.out.println("   Past Event List");
+        }
+        else if(day == 2){
+            System.out.println("   Upcoming Event List");
+        }
         System.out.println("==========================");
 
-        //table header
+        ArrayReturned.clear(); // clear the content of ArrayReturn before adding index
         System.out.printf("%-4s%-8s%-40s%-15s%-30s%s\n","No.","ID","Event Name","State","Address","Date");
-        //content
+        int count =1;
+        LocalDate today = LocalDate.now();
         for (int i=0;i<EventList.size();i++){
-            System.out.printf("%-4s",i+1);
+            if(today.isAfter(EventList.get(i).getEventDate()) && day==2){
+                continue;
+            } 
+            else if(today.isBefore(EventList.get(i).getEventDate()) && day==1){
+                continue;
+            }
+            System.out.printf("%-4s",count);
             EventList.get(i).printInfoWithoutDonor();
+            count++;
+            ArrayReturned.add(i);
         }
+        System.out.printf("%-4s%s\n",(count),"Back to admin menu\n");
+
+        return count; // index for back to admin menu
     }
 
     //done
@@ -350,38 +385,31 @@ public class BloocDonationSystem {
         //content
         for (int i=0;i<DonorList.size();i++){
             System.out.printf("%-4s",i+1);
-            System.out.printf("%-15s",DonorList.get(i).getUsername());
-            System.out.printf("%-30s",DonorList.get(i).getName());
-            System.out.printf("%-15s",DonorList.get(i).getIC());
-            System.out.printf("%-6s",DonorList.get(i).getYearBirth());
-            System.out.printf("%-12s",DonorList.get(i).getWeight());
-            System.out.printf("%s",DonorList.get(i).getBloodType());
-            System.out.println();
+            DonorList.get(i).printInfo();
         }
     }
 
     public void approvePending(){
-        int innerChoice=0 ,choice=0;
-        while(choice!=(EventList.size()+1)){
+        int innerChoice=0 ,choice=0, exitIndex=1;
+        while(choice!=exitIndex){
             try{
-                printEventList();
-                System.out.printf("%-4s%s\n",(EventList.size()+1),"Back to previous page\n");
+                exitIndex = printEventList(2); // display pending list
 
                 choice = getChoice();
-                if (ChoiceNotInRange(1, (EventList.size()+1), choice)) {
+                if (ChoiceNotInRange(1, exitIndex, choice)) {
                     throw new InvalidChoice("Invalid Choice");
                 }
                 //if not back to admin menu
-                if(choice != (EventList.size()+1)){
-                    EventList.get((choice-1)).printInfo();
-                    EventList.get(choice-1).printPendingDonor();
+                if(choice >0 && choice < exitIndex){
+                    EventList.get(ArrayReturned.get(choice-1)).printInfo();
+                    EventList.get(ArrayReturned.get(choice-1)).printPendingDonor();
 
                     innerChoice = getChoice();
-                    if(innerChoice>-1 && innerChoice<EventList.get(choice-1).getPendingDonorList().size()){
+                    if(innerChoice>-1 && innerChoice<EventList.get(ArrayReturned.get(choice-1)).getPendingDonorList().size()){
                         //add to approvelist
-                        EventList.get(choice-1).getDonorList().add(DonorList.get(EventList.get(choice-1).getPendingDonorList().get(innerChoice-1).getID()));
+                        EventList.get(ArrayReturned.get(choice-1)).getDonorList().add(DonorList.get(EventList.get(ArrayReturned.get(choice-1)).getPendingDonorList().get(innerChoice-1).getID()));
                         //romove from pendingList
-                        EventList.get(choice-1).getPendingDonorList().remove(innerChoice-1);
+                        EventList.get(ArrayReturned.get(choice-1)).getPendingDonorList().remove(innerChoice-1);
                         
                     }
                     
@@ -397,7 +425,7 @@ public class BloocDonationSystem {
             }
         }
     }
-    //can do approve pending application if got time
+    
     public void adminMenu(){
         int choice = 0;
         do {
@@ -423,15 +451,18 @@ public class BloocDonationSystem {
                     case (2):
                         editEvent();
                     case (3):
-                        int event=-1;
-                        while(event != (EventList.size()+1)){
-                            printEventList();
-                            System.out.printf("%-4s%s\n",(EventList.size()+1),"Back to admin menu\n");
-                            event = getChoice();
-                            if(event == (EventList.size()+1)){continue;}
-                            EventList.get(event-1).printApprovedDonor();
-                            EventList.get(event-1).printPendingDonor();
-                        }
+                        int event=-1, exitIndex=-1;
+                        do{
+                            exitIndex = printEventList(-1); //choose whole/pass/upcoming event list
+                            event = getChoice(); // choose event or exit
+                            if(event<0 || event >= exitIndex){continue;}
+                            clearScreen();
+                            EventList.get(ArrayReturned.get(event-1)).printInfo();
+                            System.out.println("\nRegistered Donors: ");
+                            EventList.get(ArrayReturned.get(event-1)).printApprovedDonor();
+                            EventList.get(ArrayReturned.get(event-1)).printPendingDonor();
+                            pressEnterToContinue();
+                        }while(event != exitIndex);
                         clearScreen();
                         break;
                     case (4):
@@ -531,12 +562,23 @@ public class BloocDonationSystem {
         System.out.println("    Registered Event(s)");
         System.out.println("==========================");
 
+        System.out.println("<<< Approved >>>");
         System.out.printf("%-4s%-40s%-15s%-30s%s\n","No.","Name", "State", "Address", "Date");
-        //loop through whole event list
-
         for(int i=0; i<EventList.size();i++){
             for(int j=0; j<EventList.get(i).getDonorList().size();j++){
                 if(EventList.get(i).getDonorList().get(j).getID()==currLoggedInDonorID){
+                    System.out.printf("%-4s",index);
+                    EventList.get(i).printInfoWithoutDonor();
+                    index++;
+                }
+            }
+        }
+
+        System.out.println("\n<<< Pending >>>");
+        System.out.printf("%-4s%-40s%-15s%-30s%s\n","No.","Name", "State", "Address", "Date");
+        for(int i=0; i<EventList.size();i++){
+            for(int j=0; j<EventList.get(i).getPendingDonorList().size();j++){
+                if(EventList.get(i).getPendingDonorList().get(j).getID()==currLoggedInDonorID){
                     System.out.printf("%-4s",index);
                     EventList.get(i).printInfoWithoutDonor();
                     index++;
@@ -548,30 +590,29 @@ public class BloocDonationSystem {
     //only reachable after a donor logged in
     public void eventRegistration(){
         clearScreen();
-        int choice = -1;
+        int choice = -1, exitIndex = 1;
 
-        while(choice!=(EventList.size() + 1)){
+        while(choice!=exitIndex){
             try{
                 System.out.println("==========================");
                 System.out.println("    Event Registration");
                 System.out.println("==========================");
 
-                printEventList();
-                System.out.printf("%-4s%s\n",(EventList.size()+1),"Back to Donor Menu\n");
+                exitIndex = printEventList(2); //display upcoming events
 
                 choice = getChoice();
-                if (ChoiceNotInRange(1, (EventList.size() + 1), choice)) {
+                if (ChoiceNotInRange(1, exitIndex, choice)) {
                     throw new InvalidChoice("Invalid Choice");
                 }
 
                 //if not back to donor menu
-                if(choice != (EventList.size()+1)){
-                    EventList.get((choice-1)).printInfo();
+                if(choice != exitIndex){
+                    EventList.get(ArrayReturned.get(choice-1)).printInfo();
                     //confirmation
                     System.out.println("Are you sure? [Y/N]");
                     char confirm = Character.toUpperCase(input.next().charAt(0));
                     if(confirm == 'Y'){
-                        EventList.get(choice-1).getDonorList().add(DonorList.get(currLoggedInDonorID));
+                        EventList.get(ArrayReturned.get(choice-1)).getDonorList().add(DonorList.get(currLoggedInDonorID));
                         System.out.println("Successfully registered!");
                     }
                     
@@ -598,7 +639,7 @@ public class BloocDonationSystem {
                 System.out.println("==========================");
                 System.out.println("      Donor Menu");
                 System.out.println("==========================");
-                System.out.println("1. Display Event List");
+                System.out.println("1. Display Upcoming Event List");
                 System.out.println("2. Display Registered Event");
                 System.out.println("3. Register For Event");
                 System.out.println("4. Logout");
@@ -609,7 +650,7 @@ public class BloocDonationSystem {
                 }
                 switch (choice) {
                     case (1):
-                        printEventList();
+                        printEventList(2); // display upcoming events
                         pressEnterToContinue();
                         break;
                     case (2):
@@ -724,7 +765,7 @@ public class BloocDonationSystem {
         sys.loadPending();
 
         sys.mainMenu();
-
+        
         sys.saveAssoc();
         sys.saveDonor();
         sys.saveEvent();

@@ -52,12 +52,14 @@ public class BloodDonor extends User{
         return weight;
     }
 
+    // print in one row (for table)
     public void printInfo(){
-        System.out.println("Full Name: " + name.getFullName());
-        System.out.println("IC: " + IC);
-        System.out.println("Year Of Birth: " + yearBirth);
-        System.out.println("Weight: " + weight + " KG");
-        System.out.println("Blood Type: " + bloodType.getName());
+        System.out.printf("%-15s",getUsername());
+        System.out.printf("%-30s",name.getFullName());
+        System.out.printf("%-15s",IC);
+        System.out.printf("%-6s",yearBirth);
+        System.out.printf("%-12s",weight);
+        System.out.printf("%s\n",bloodType.getName());
     }
 
     public int getID() {

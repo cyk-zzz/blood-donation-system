@@ -70,20 +70,21 @@ public class BloodDonationEvent {
         System.out.println("Date: "+eventDate.toString());
     }
 
-    //print info without donor in a row
+    //print info in a row
     public void printInfoWithoutDonor(){
         System.out.printf("%-8s%-40s%-15s%-30s%s\n",eventID,eventName,eventState, eventAddress, eventDate);
     }
 
     public void printApprovedDonor(){
-        System.out.println("Registered Donors (approved): ");
+        System.out.println("<<< Approved >>>");
         for (int i=0;i<donorList.size();i++){
             System.out.printf("%d. %s %d\n",i+1,donorList.get(i).getName(),donorList.get(i).getID());
         }  
         System.out.println();  
     }
+
     public void printPendingDonor(){
-        System.out.println("\nRegistered Donors (pending): ");
+        System.out.println("<<< Pending >>>");
         for (int i=0;i<pendingDonorList.size();i++){
             System.out.printf("%d. %s %d\n",i+1,pendingDonorList.get(i).getName(),pendingDonorList.get(i).getID());
         }
