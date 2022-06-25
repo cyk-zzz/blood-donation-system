@@ -1,4 +1,4 @@
-public class Admin extends User{
+public class Admin extends User implements Display{
     private int adminID;
 
     public Admin(String username, String password, int adminID){

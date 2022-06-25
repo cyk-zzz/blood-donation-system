@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 
 
-public class BloodDonationEvent {
+public class BloodDonationEvent implements Display{
     private String eventID;
     private String eventName;
     private State eventState;

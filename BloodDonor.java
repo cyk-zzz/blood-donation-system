@@ -1,6 +1,6 @@
 
 
-public class BloodDonor extends User{
+public class BloodDonor extends User implements Display{
     int ID;
     final Name name;
     final Blood bloodType;
