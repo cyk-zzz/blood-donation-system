@@ -333,7 +333,7 @@ public class BloocDonationSystem {
             System.out.println("==========================");
             System.out.println("   Display Event List");
             System.out.println("==========================");
-            System.out.println("[0]=printEntireEventList; [1]=printPassEventList; [2]=printUpcomingEventList");
+            System.out.println("[0]=print Entire Event List; [1]=Print Past Event List; [2]=Print Upcoming Event List");
             day = getChoice();
             if(day!=0 && day!=1 && day!=2){
                 return -1;// invalid choice, return to admin menu
