@@ -6,7 +6,6 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.time.format.DateTimeFormatter;
 
-
 public class BloocDonationSystem {
     final String adminUsername = "admin";
     final String adminPassword = "admin";
@@ -15,6 +14,7 @@ public class BloocDonationSystem {
     final String BloodDonorPath = "Text\\Donor.txt";
     final String BloodDonorEventPath = "Text\\Event.txt";
     final String EventAssocPath = "Text\\EventAssoc.txt";
+    final String PendingPath = "Text\\PendingApplication.txt";
     private ArrayList<BloodDonor> DonorList = new ArrayList<>();
     private ArrayList<BloodDonationEvent> EventList = new ArrayList<>();
     private int currLoggedInDonorID; // set curr donor
@@ -29,6 +29,28 @@ public class BloocDonationSystem {
         return EventList;
     }
 
+    // to get pending applications
+    public void loadPending() throws FileNotFoundException{
+        File PendingFile = new File(PendingPath);
+        Scanner read = new Scanner(PendingFile);
+        int findEvent = 0;
+        while(read.hasNextLine()){
+            String x = read.nextLine();
+            String[] y = x.split(",");
+
+            if (y.length==1){
+                findEvent++;
+                continue;
+            }
+
+            for (int donorIndex=1;donorIndex<y.length;donorIndex++){
+                EventList.get(findEvent).addPendingDonor(DonorList.get(Integer.parseInt(y[donorIndex])));
+            }
+            findEvent++;
+        }
+        read.close();
+    }
+
     //done
     public void loadAssoc() throws FileNotFoundException{
         File AssocFile = new File(EventAssocPath);
@@ -39,6 +61,7 @@ public class BloocDonationSystem {
             String[] y = x.split(",");
 
             if (y.length==1){
+                findEvent++;
                 continue;
             }
 
@@ -94,6 +117,24 @@ public class BloocDonationSystem {
         read.close();
     }
     
+    public void savePending() throws FileNotFoundException{
+        PrintWriter PendingFile = new PrintWriter(PendingPath);
+        String perLine = new String();
+        for(int i=0; i<EventList.size(); i++){
+            perLine = EventList.get(i).getEventID();
+            for (int j=0;j<EventList.get(i).getPendingDonorList().size();j++){
+                perLine += ",";
+                perLine += EventList.get(i).getPendingDonorList().get(j).getID();
+            }
+
+            if(i!=(EventList.size()-1)){
+                perLine += "\n";
+            }
+            PendingFile.print(perLine);
+        }
+        PendingFile.close();
+    }
+
     //done
     public void saveAssoc() throws FileNotFoundException{
         PrintWriter AssocFile = new PrintWriter(EventAssocPath);
@@ -288,17 +329,13 @@ public class BloocDonationSystem {
         System.out.println("==========================");
         System.out.println("      Event List");
         System.out.println("==========================");
-        //header
-        System.out.printf("%-4s%-8s%-30s%-15s%-50s%s\n","No.","ID","Event Name","State","Address","Date");
+
+        //table header
+        System.out.printf("%-4s%-8s%-40s%-15s%-30s%s\n","No.","ID","Event Name","State","Address","Date");
         //content
         for (int i=0;i<EventList.size();i++){
             System.out.printf("%-4s",i+1);
-            System.out.printf("%-8s",EventList.get(i).getEventID());
-            System.out.printf("%-30s",EventList.get(i).getEventName());
-            System.out.printf("%-15s",EventList.get(i).getEventState());
-            System.out.printf("%-50s",EventList.get(i).getEventAddress());
-            System.out.printf("%s",EventList.get(i).getEventDate());
-            System.out.println();
+            EventList.get(i).printInfoWithoutDonor();
         }
     }
 
@@ -323,6 +360,43 @@ public class BloocDonationSystem {
         }
     }
 
+    public void approvePending(){
+        int innerChoice=0 ,choice=0;
+        while(choice!=(EventList.size()+1)){
+            try{
+                printEventList();
+                System.out.printf("%-4s%s\n",(EventList.size()+1),"Back to previous page\n");
+
+                choice = getChoice();
+                if (ChoiceNotInRange(1, (EventList.size()+1), choice)) {
+                    throw new InvalidChoice("Invalid Choice");
+                }
+                //if not back to admin menu
+                if(choice != (EventList.size()+1)){
+                    EventList.get((choice-1)).printInfo();
+                    EventList.get(choice-1).printPendingDonor();
+
+                    innerChoice = getChoice();
+                    if(innerChoice>-1 && innerChoice<EventList.get(choice-1).getPendingDonorList().size()){
+                        //add to approvelist
+                        EventList.get(choice-1).getDonorList().add(DonorList.get(EventList.get(choice-1).getPendingDonorList().get(innerChoice-1).getID()));
+                        //romove from pendingList
+                        EventList.get(choice-1).getPendingDonorList().remove(innerChoice-1);
+                        
+                    }
+                    
+                }
+            }
+
+            catch (InputMismatchException e){
+                input.next();
+                System.out.println("Invalid Input!!");
+            }
+            catch (InvalidChoice e) {
+                System.out.println("Invalid Choice!!");
+            }
+        }
+    }
     //can do approve pending application if got time
     public void adminMenu(){
         int choice = 0;
@@ -335,7 +409,8 @@ public class BloocDonationSystem {
                 System.out.println("2. Edit Event");
                 System.out.println("3. Display Event List");
                 System.out.println("4. Display Donor List");
-                System.out.println("5. Logout");
+                System.out.println("5. Approve Pending Application");
+                System.out.println("6. Logout");
 
                 choice = getChoice();
                 if (ChoiceNotInRange(1, 5, choice)) {
@@ -348,14 +423,26 @@ public class BloocDonationSystem {
                     case (2):
                         editEvent();
                     case (3):
-                        printEventList();
-                        pressEnterToContinue();
+                        int event=-1;
+                        while(event != (EventList.size()+1)){
+                            printEventList();
+                            System.out.printf("%-4s%s\n",(EventList.size()+1),"Back to admin menu\n");
+                            event = getChoice();
+                            if(event == (EventList.size()+1)){continue;}
+                            EventList.get(event-1).printApprovedDonor();
+                            EventList.get(event-1).printPendingDonor();
+                        }
+                        clearScreen();
                         break;
                     case (4):
                         printDonorList();
                         pressEnterToContinue();
                         break;
                     case (5):
+                        approvePending();
+                        clearScreen();
+                        break;
+                    case (6):
                         break;
                 }
             }
@@ -368,7 +455,7 @@ public class BloocDonationSystem {
             catch (InvalidChoice e) {
                 System.out.println("Invalid Choice");
             }
-        } while(choice!=5);
+        } while(choice!=6);
 
     }
 
@@ -384,26 +471,24 @@ public class BloocDonationSystem {
         System.out.print("Enter password: ");
         String password = input.next();
 
-        System.out.println(username+" "+password);
         //admin
         if(role==1){
-            System.out.println("Its admin");
-            if(username =="admin" && password == "admin"){ 
-                System.out.println("Valid");
+            if(username.equals("admin") && password.equals("admin")){ 
+                clearScreen();
                 return true;
             }
         }
         //donor
         else if(role==2){
             for(int i=0; i<DonorList.size();i++){
-                if(DonorList.get(i).getUsername()==username && DonorList.get(i).getPassword()==password){
-                    System.out.println("Valid");
+                if(DonorList.get(i).getUsername().equals(username) && DonorList.get(i).getPassword().equals(password)){
                     currLoggedInDonorID = DonorList.get(i).getID();
                     return true;
                 }
             }
         }
-        System.out.println("Invalid");
+        System.out.println("Invalid Username / Password");
+        pressEnterToContinue();
         return false; // by default, return false
     }
 
@@ -440,7 +525,6 @@ public class BloocDonationSystem {
     public void viewRegisteredEvent(){
         int index = 1;
         //set curr donor id first, later use login function
-        currLoggedInDonorID = 1;
 
         clearScreen();
         System.out.println("==========================");
@@ -461,11 +545,51 @@ public class BloocDonationSystem {
         }
     }
 
+    //only reachable after a donor logged in
     public void eventRegistration(){
+        clearScreen();
+        int choice = -1;
+
+        while(choice!=(EventList.size() + 1)){
+            try{
+                System.out.println("==========================");
+                System.out.println("    Event Registration");
+                System.out.println("==========================");
+
+                printEventList();
+                System.out.printf("%-4s%s\n",(EventList.size()+1),"Back to Donor Menu\n");
+
+                choice = getChoice();
+                if (ChoiceNotInRange(1, (EventList.size() + 1), choice)) {
+                    throw new InvalidChoice("Invalid Choice");
+                }
+
+                //if not back to donor menu
+                if(choice != (EventList.size()+1)){
+                    EventList.get((choice-1)).printInfo();
+                    //confirmation
+                    System.out.println("Are you sure? [Y/N]");
+                    char confirm = Character.toUpperCase(input.next().charAt(0));
+                    if(confirm == 'Y'){
+                        EventList.get(choice-1).getDonorList().add(DonorList.get(currLoggedInDonorID));
+                        System.out.println("Successfully registered!");
+                    }
+                    
+                }
+            }
+            catch (InputMismatchException e){
+                input.next();
+                System.out.println("Invalid Input!!");
+            }
+            catch (InvalidChoice e) {
+                System.out.println("Invalid Choice!!");
+            }
+        }
+
 
     }
 
-    //not yet 
+    //done 
     public void donorMenu() throws InputMismatchException{
         int choice = 0;
 
@@ -512,9 +636,9 @@ public class BloocDonationSystem {
 
     }
 
-    //not yet assign function
-    public void menuBeforeLogin(int role) throws InputMismatchException{
-        int choice;
+    //not yet assign function, only for donor
+    public void menuBeforeLogin() throws InputMismatchException{
+        int choice=0;
         do {
             try {
                 displayHeader();
@@ -530,9 +654,8 @@ public class BloocDonationSystem {
                         register();
                         break;
                     case (2):
-                        if(login(role)){
-                            if(role==1){ adminMenu();}
-                            else if(role==2){ donorMenu();}
+                        if(login(2)){
+                            donorMenu();
                         }
                         break;
                     case (3):
@@ -546,7 +669,7 @@ public class BloocDonationSystem {
                 continue;
             }
             
-        }while(choice!=3)
+        }while(choice!=3);
     }
 
     public void mainMenu() {
@@ -564,10 +687,13 @@ public class BloocDonationSystem {
                 }
                 switch (choice) {
                     case (1):
-                        menuBeforeLogin(1);
+                        //admin directly go to login page
+                        if(login(1)){
+                            adminMenu();
+                        } 
                         break;
                     case (2):
-                        menuBeforeLogin(2);
+                        menuBeforeLogin(); //choose login or register
                         break;
                     case (3):
                         System.out.println("Thank You~ Have a nice day~");
@@ -595,12 +721,14 @@ public class BloocDonationSystem {
         sys.loadEvent();
         sys.loadDonor();
         sys.loadAssoc();
+        sys.loadPending();
 
-        sys.login(1);
+        sys.mainMenu();
 
         sys.saveAssoc();
         sys.saveDonor();
         sys.saveEvent();
+        sys.savePending();
         System.exit(0);
     }
 }
