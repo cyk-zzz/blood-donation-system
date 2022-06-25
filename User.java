@@ -1,5 +1,3 @@
-import javax.script.AbstractScriptEngine;
-
 public abstract class User {
     private String username;
     private String password;

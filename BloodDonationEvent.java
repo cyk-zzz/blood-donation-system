@@ -11,8 +11,8 @@ public class BloodDonationEvent {
     private State eventState;
     private String eventAddress;
     private LocalDate eventDate;
-    private ArrayList <BloodDonor> donorList;//showing association
-    private ArrayList <BloodDonor> pendingDonorList;//showing association
+    private ArrayList <BloodDonor> donorList;
+    private ArrayList <BloodDonor> pendingDonorList;//showing aggregation
 
     Scanner input = new Scanner(System.in);
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
